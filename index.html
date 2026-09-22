@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나뭇잎</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(2rem, 6vw, 5rem);
+    }
+    #title {
+      font-family: "Orbitron", "Share Tech Mono", monospace;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 4.8vw, 4rem);
+      letter-spacing: 0.45em;
+      margin-left: 0.45em;             /* letter-spacing 오른쪽 여백 보정 */
+      color: #5ff2ff;
+      text-shadow:
+        0 0 6px  rgba(95, 242, 255, 0.9),
+        0 0 18px rgba(95, 242, 255, 0.45),
+        0 0 40px rgba(95, 242, 255, 0.2);
+      user-select: none;
+    }
+    #countdown {
+      display: flex;
+      align-items: center;
+      gap: 0.35em;
+      font-size: clamp(1.3rem, 4.8vw, 4.8rem);   /* 숫자 하나의 높이 기준 */
+      transform: skewX(-6deg);                /* 7-seg 특유의 살짝 기울어진 느낌 */
+      user-select: none;
+    }
+    .digit { height: 1em; width: calc(1em * 60 / 104); display: block; }
+    .colon { height: 1em; width: calc(1em * 20 / 104); display: block; }
+    .seg      { fill: #fff; opacity: 0.06; }   /* 꺼진 세그먼트 */
+    .seg.on   { opacity: 1; }
+    .dot      { fill: #fff; }
+  </style>
+</head>
+<body>
+  <div id="title">PROJECT IN:IT</div>
+  <div id="countdown"></div>
+
+  <script>
+    // 공개 시점: 2026-12-14 12:00 KST (모든 접속자에게 동일)
+    const TARGET = new Date("2026-12-14T12:00:00+09:00").getTime();
+
+    // 7-segment 배치 (a 위, b 우상, c 우하, d 아래, e 좌하, f 좌상, g 가운데)
+    const SEG_POINTS = {
+      a: "12,2 48,2 53,7 48,12 12,12 7,7",
+      b: "48,12 53,7 58,12 58,47 53,52 48,47",
+      c: "48,57 53,52 58,57 58,92 53,97 48,92",
+      d: "12,92 48,92 53,97 48,102 12,102 7,97",
+      e: "2,57 7,52 12,57 12,92 7,97 2,92",
+      f: "2,12 7,7 12,12 12,47 7,52 2,47",
+      g: "12,47 48,47 53,52 48,57 12,57 7,52",
+    };
+    const DIGIT_SEGS = ["abcdef","bc","abdeg","abcdg","bcfg","acdfg","acdefg","abc","abcdefg","abcdfg"];
+    const NS = "http://www.w3.org/2000/svg";
+
+    function makeDigit() {
+      const svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("viewBox", "0 0 60 104");
+      svg.setAttribute("class", "digit");
+      const segs = {};
+      for (const [k, pts] of Object.entries(SEG_POINTS)) {
+        const p = document.createElementNS(NS, "polygon");
+        p.setAttribute("points", pts);
+        p.setAttribute("class", "seg");
+        svg.appendChild(p);
+        segs[k] = p;
+      }
+      return { svg, segs, cur: null };
+    }
+
+    function makeColon() {
+      const svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("viewBox", "0 0 20 104");
+      svg.setAttribute("class", "colon");
+      for (const y of [30, 66]) {
+        const r = document.createElementNS(NS, "rect");
+        r.setAttribute("x", 5); r.setAttribute("y", y);
+        r.setAttribute("width", 10); r.setAttribute("height", 10);
+        r.setAttribute("class", "dot");
+        svg.appendChild(r);
+      }
+      return svg;
+    }
+
+    // 레이아웃: DDD : HH : MM : SS : mmm
+    const root = document.getElementById("countdown");
+    const digits = [];
+    [3, 2, 2, 2, 3].forEach((n, gi) => {
+      if (gi > 0) root.appendChild(makeColon());
+      for (let i = 0; i < n; i++) {
+        const dg = makeDigit();
+        root.appendChild(dg.svg);
+        digits.push(dg);
+      }
+    });
+
+    function setDigit(dg, val) {
+      if (dg.cur === val) return;
+      dg.cur = val;
+      const on = DIGIT_SEGS[val];
+      for (const k in dg.segs) dg.segs[k].classList.toggle("on", on.includes(k));
+    }
+
+    const pad = (n, w) => String(n).padStart(w, "0");
+
+    function render() {
+      let diff = Math.max(0, TARGET - Date.now());          // ms 단위
+      const ms = diff % 1000; diff = Math.floor(diff / 1000);
+      const d = Math.floor(diff / 86400); diff %= 86400;
+      const h = Math.floor(diff / 3600);  diff %= 3600;
+      const m = Math.floor(diff / 60);
+      const s = diff % 60;
+      const str = pad(Math.min(d, 999), 3) + pad(h, 2) + pad(m, 2) + pad(s, 2) + pad(ms, 3);
+      for (let i = 0; i < digits.length; i++) setDigit(digits[i], +str[i]);
+      requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
