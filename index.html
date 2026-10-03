@@ -69,27 +69,36 @@
     .seg      { fill: #fff; opacity: 0.06; }   /* 꺼진 세그먼트 */
     .seg.on   { opacity: 1; }
     .dot      { fill: #fff; }
-    #insta {
+    #foot {
       position: fixed;
       left: 50%;
       bottom: clamp(20px, 4vh, 40px);
       transform: translateX(-50%);
       display: flex;
       align-items: center;
-      gap: 0.55em;
-      font-family: "Orbitron", monospace;
-      font-weight: 500;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6em 1.4em;
+      width: max-content;
+      max-width: calc(100vw - 32px);
       font-size: clamp(0.75rem, 1.1vw, 0.95rem);
-      letter-spacing: 0.12em;
+    }
+    #foot a {
+      display: flex;
+      align-items: center;
+      gap: 0.55em;
       color: rgba(255, 255, 255, 0.45);
       text-decoration: none;
       transition: color 0.3s, text-shadow 0.3s;
     }
-    #insta svg { width: 1.3em; height: 1.3em; }
-    #insta:hover {
+    #foot a:hover {
       color: #5ff2ff;
       text-shadow: 0 0 8px rgba(95, 242, 255, 0.6);
     }
+    #insta { font-family: "Orbitron", monospace; font-weight: 500; letter-spacing: 0.12em; }
+    #insta svg { width: 1.3em; height: 1.3em; }
+    #mail { font-family: "Orbitron", monospace; font-weight: 500; letter-spacing: 0.08em; }
+    #privacy { font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif; font-size: 0.9em; }
   </style>
 </head>
 <body>
@@ -99,14 +108,18 @@
   </div>
   <div id="countdown"></div>
 
-  <a id="insta" href="https://www.instagram.com/nmnp.official/" target="_blank" rel="noopener">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="5"/>
-      <circle cx="12" cy="12" r="4.2"/>
-      <circle cx="17.3" cy="6.7" r="0.6" fill="currentColor" stroke="none"/>
-    </svg>
-    @nmnp.official
-  </a>
+  <footer id="foot">
+    <a id="insta" href="https://www.instagram.com/nmnp.official/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="5"/>
+        <circle cx="12" cy="12" r="4.2"/>
+        <circle cx="17.3" cy="6.7" r="0.6" fill="currentColor" stroke="none"/>
+      </svg>
+      @nmnp.official
+    </a>
+    <a id="mail" href="mailto:contact@nmnp.kr">contact@nmnp.kr</a>
+    <a id="privacy" href="privacy.html">개인정보처리방침</a>
+  </footer>
 
   <script>
     // 공개 시점: 2026-12-22 12:00 KST (모든 접속자에게 동일)
